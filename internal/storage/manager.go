@@ -35,7 +35,7 @@ func NewManager(logger *zap.Logger) (*Manager, error) {
 }
 
 func (m *Manager) UploadFile(ctx context.Context, filePath string, recipient string) error {
-	m.logger.Info("uploading file", zap.String("fileName", filePath))
+	m.logger.Info("uploading file", zap.String("filePath", filePath))
 
 	api := m.client.API()
 
