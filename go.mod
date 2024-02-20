@@ -3,6 +3,7 @@ module github.com/yonsken/tg-freestore
 go 1.22.0
 
 require (
+	github.com/gotd/contrib v0.19.0
 	github.com/gotd/td v0.97.0
 	go.uber.org/zap v1.26.0
 )
