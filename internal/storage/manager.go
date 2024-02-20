@@ -46,12 +46,9 @@ func (m *Manager) UploadFile(ctx context.Context, filePath string, recipient str
 		return fmt.Errorf("uploading file: %w", err)
 	}
 
-	sender := message.NewSender(api).WithUploader(uploader)
+	file := message.File(upload).Filename(filepath.Base(filePath))
 
-	file := message.File(upload)
-	file = file.Filename(filepath.Base(filePath))
-
-	if _, err := sender.Resolve(recipient).Media(ctx, file); err != nil {
+	if _, err := message.NewSender(api).Resolve(recipient).Media(ctx, file); err != nil {
 		return fmt.Errorf("sending message: %w", err)
 	}
 
