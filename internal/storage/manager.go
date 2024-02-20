@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"path/filepath"
+	"time"
 
 	"github.com/gotd/contrib/bg"
 	"github.com/gotd/td/telegram"
@@ -39,12 +40,32 @@ func (m *Manager) UploadFile(ctx context.Context, filePath string, recipient str
 
 	api := m.client.API()
 
-	uploader := uploader.NewUploader(api)
+	progress := new(uploadProgress)
+	progressCtx, progressCancel := context.WithCancel(ctx)
+	defer progressCancel()
+
+	go func() {
+		ticker := time.NewTicker(time.Second * 5)
+		defer ticker.Stop()
+
+		for {
+			select {
+			case <-progressCtx.Done():
+				return
+			case <-ticker.C:
+				m.logger.Info("upload progress update", zap.Float32("percentage", progress.percent))
+			}
+		}
+	}()
+
+	uploader := uploader.NewUploader(api).WithProgress(progress)
 
 	upload, err := uploader.FromPath(ctx, filepath.Clean(filePath))
 	if err != nil {
 		return fmt.Errorf("uploading file: %w", err)
 	}
+
+	progressCancel()
 
 	file := message.File(upload).Filename(filepath.Base(filePath))
 
