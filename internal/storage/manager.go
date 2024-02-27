@@ -35,7 +35,9 @@ func NewManager(logger *zap.Logger) (*Manager, error) {
 }
 
 func (m *Manager) UploadFile(ctx context.Context, filePath string, recipient string) error {
-	m.logger.Info("uploading file", zap.String("filePath", filePath))
+	logger := m.logger.With(zap.String("filePath", filePath), zap.String("recipient", recipient))
+
+	logger.Info("uploading file")
 
 	api := m.client.API()
 
@@ -51,6 +53,8 @@ func (m *Manager) UploadFile(ctx context.Context, filePath string, recipient str
 	if _, err := message.NewSender(api).Resolve(recipient).Media(ctx, file); err != nil {
 		return fmt.Errorf("sending message: %w", err)
 	}
+
+	logger.Info("finished uploading file")
 
 	return nil
 }
