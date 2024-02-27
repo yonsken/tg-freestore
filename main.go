@@ -18,6 +18,10 @@ func main() {
 }
 
 func run() error {
+	if len(os.Args) != 1 {
+		return nil
+	}
+
 	vars, err := env.GetRequiredEnvVars()
 	if err != nil {
 		return fmt.Errorf("getting required environment variables: %w", err)
@@ -36,8 +40,15 @@ func run() error {
 
 	ctx := context.Background()
 
-	if err := manager.UploadFile(ctx, vars.UploadFilePath, vars.UploadFileRecipient); err != nil {
-		return fmt.Errorf("uploading test file: %w", err)
+	switch os.Args[0] {
+	case "list":
+		if err := manager.ListFiles(ctx, vars.UploadFileRecipient); err != nil {
+			return fmt.Errorf("listing test files: %w", err)
+		}
+	case "upload":
+		if err := manager.UploadFile(ctx, vars.UploadFilePath, vars.UploadFileRecipient); err != nil {
+			return fmt.Errorf("uploading test file: %w", err)
+		}
 	}
 
 	return nil

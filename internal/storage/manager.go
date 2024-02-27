@@ -8,9 +8,12 @@ import (
 	"github.com/gotd/contrib/bg"
 	"github.com/gotd/td/telegram"
 	"github.com/gotd/td/telegram/message"
+	"github.com/gotd/td/telegram/message/peer"
+	"github.com/gotd/td/telegram/query/messages"
 	"github.com/gotd/td/telegram/uploader"
-	"github.com/yonsken/tg-freestore/internal/client"
 	"go.uber.org/zap"
+
+	"github.com/yonsken/tg-freestore/internal/client"
 )
 
 type Manager struct {
@@ -55,6 +58,28 @@ func (m *Manager) UploadFile(ctx context.Context, filePath string, recipient str
 	}
 
 	logger.Info("finished uploading file")
+
+	return nil
+}
+
+func (m *Manager) ListFiles(ctx context.Context, recipient string) error {
+	logger := m.logger.With(zap.String("recipient", recipient))
+
+	logger.Info("listing files")
+
+	api := m.client.API()
+
+	inputPeer, err := peer.DefaultResolver(api).ResolveDomain(ctx, recipient)
+	if err != nil {
+		return fmt.Errorf("resolving peer: %w", err)
+	}
+
+	msgCount, err := messages.NewQueryBuilder(api).GetHistory(inputPeer).Count(ctx)
+	if err != nil {
+		return fmt.Errorf("getting message count: %w", err)
+	}
+
+	logger.Info("messages", zap.Int("count", msgCount))
 
 	return nil
 }
