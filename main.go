@@ -32,11 +32,7 @@ func run() error {
 	if err != nil {
 		return fmt.Errorf("creating storage manager: %w", err)
 	}
-	defer func() {
-		if err := manager.Close(); err != nil {
-			logger.Error("failed to close storage manager", zap.Error(err))
-		}
-	}()
+	defer manager.Close()
 
 	ctx := context.Background()
 

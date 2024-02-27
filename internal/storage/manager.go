@@ -55,6 +55,8 @@ func (m *Manager) UploadFile(ctx context.Context, filePath string, recipient str
 	return nil
 }
 
-func (m *Manager) Close() error {
-	return m.stopClient()
+func (m *Manager) Close() {
+	if err := m.stopClient(); err != nil {
+		m.logger.Error("failed to close storage manager", zap.Error(err))
+	}
 }
